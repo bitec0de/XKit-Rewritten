@@ -8,6 +8,7 @@ const blogs = new Set();
 const groupsFromHex = /^#(?<red>[A-Fa-f0-9]{1,2})(?<green>[A-Fa-f0-9]{1,2})(?<blue>[A-Fa-f0-9]{1,2})$/;
 
 let enableOnPeepr;
+let preferDarkerBackgrounds;
 let blacklistedUsernames;
 
 let blacklist;
@@ -20,6 +21,11 @@ const hexToRGB = (hex) => {
     .join(', ');
 };
 
+const brightness = (hex) => {
+  const { red, green, blue } = hex.match(groupsFromHex).groups;
+  return parseInt(red, 16) + parseInt(green, 16) + parseInt(blue, 16)
+}
+
 const processPosts = async function (postElements) {
   filterPostElements(postElements, { includeFiltered: true }).forEach(async postElement => {
     if (postElement.matches(blogViewSelector) && !enableOnPeepr) return;
@@ -31,11 +37,17 @@ const processPosts = async function (postElements) {
     if (!blogs.has(name)) {
       blogs.add(name);
 
-      const {
+      let {
         backgroundColor,
         titleColor,
         linkColor
       } = theme;
+
+      if (preferDarkerBackgrounds && brightness(backgroundColor) > brightness(titleColor)) {
+        const tmp = backgroundColor;
+        backgroundColor = titleColor;
+        titleColor = tmp;
+      }
 
       const backgroundColorRGB = hexToRGB(backgroundColor);
       const titleColorRGB = hexToRGB(titleColor);
@@ -56,7 +68,7 @@ const processPosts = async function (postElements) {
 };
 
 export const main = async function () {
-  ({ enableOnPeepr, blacklistedUsernames } = await getPreferences('themed_posts'));
+  ({ enableOnPeepr, preferDarkerBackgrounds, blacklistedUsernames } = await getPreferences('themed_posts'));
   blacklist = blacklistedUsernames.split(',').map(username => username.trim());
 
   document.head.append(styleElement);

@@ -13,6 +13,11 @@
       "label": "Enable theming on the blog view",
       "default": false
     },
+    "preferDarkerBackgrounds": {
+      "type": "checkbox",
+      "label": "Use darker colors for backgrounds",
+      "default": false
+    },
     "blacklistedUsernames": {
       "type": "textarea",
       "label": "Disable theming on these blogs (comma-separated)",
